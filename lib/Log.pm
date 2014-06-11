@@ -23,8 +23,9 @@ sub new($$) {
 sub init($$) {
   my $self = shift;
   my $filename = shift;
-
-  $filename .= '.log';
+  my $ts = get_time_stamp();
+  $filename .= " $ts.log";
+  $filename =~ s/ /_/g;
 
   my $fh;
   if (open($fh,">$filename")) {
