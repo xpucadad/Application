@@ -31,8 +31,9 @@ sub new($$) {
 sub init($$) {
   my $self = shift;
   my $file_name = shift;
-
-  $file_name .= '.log';
+  my $ts = get_time_stamp();
+  $file_name .= " $ts.log";
+  $file_name =~ s/ /_/g;
 
   # Try to open the log file
   my $fh;
@@ -82,7 +83,11 @@ sub get_log() {
 }
 
 sub get_time_stamp() {
-  return "yyyy-mm-dd HH:mm:ss";
+  my ($sec,$min,$hour,$mday,$mon,$year) = localtime(time);
+  my $ts = sprintf("%4d-%02d-%02d %02d:%02d:%02d",
+          $year + 1900, $mon + 1, $mday,
+          $hour, $min, $sec);
+  return $ts;
 }
 
 BEGIN {
