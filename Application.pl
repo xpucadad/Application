@@ -7,6 +7,7 @@ use lib './lib';
 
 # project objects
 use Log;
+use ApplicationProperties;
 
 #
 # ToDo: add argument processing
@@ -15,6 +16,8 @@ use Log;
 my $log = new Log($0);
 
 $log->add_entry("This is an entry in the log.\n");
+
+my $properties = new ApplicationProperties();
 
 $log->close();
 
