@@ -58,15 +58,15 @@ sub init($$) {
 sub add_entry($$;$) {
   my $self = shift;
   my $message = shift;
-  my $print = 1;
+  my $print_to_console = 1;
   if (@_ > 0) {
-    $print = shift;
+    $print_to_console = shift;
   }
   my $fh = $self->{file_handle};
   my $time_stamp = get_time_stamp();
   my $full_msg = $time_stamp.' '.$message;
   print $fh $full_msg;
-  print $full_msg if $print;
+  print $full_msg if $print_to_console;
 }
 
 sub close($) {
