@@ -34,6 +34,7 @@ sub init($$) {
   my $ts = get_time_stamp();
   $file_name .= " $ts.log";
   $file_name =~ s/ /_/g;
+  $file_name =~ s/:/-/g;
 
   # Try to open the log file
   my $fh;
