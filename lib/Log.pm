@@ -67,7 +67,11 @@ sub get_log() {
 }
 
 sub get_time_stamp() {
-  return "yyyy-mm-dd HH:mm:ss";
+  my ($sec,$min,$hour,$mday,$mon,$year) = localtime(time);
+  my $ts = sprintf("%4d-%02d-%02d %02d:%02d:%02d",
+          $year + 1900, $mon + 1, $mday,
+          $hour, $min, $sec);
+  return $ts;
 }
 
 BEGIN {
