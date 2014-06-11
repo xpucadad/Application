@@ -10,13 +10,21 @@ use strict;
 use warnings;
 use base qw(BaseObject);
 
+# Perl modules
+use Cwd;
+
 sub new($$) {
   my $class = shift;
   my $script_name = shift;
   my $self = new BaseObject();
   bless($self, $class);
   $script_name =~ s/\.\w*//;
-  our $log = $self->init($script_name);
+  if ($self->init($script_name)) {
+    our $log = $self;
+  }
+  else {
+    $self = 0;
+  }
   return $self;
 }
 
@@ -27,12 +35,19 @@ sub init($$) {
   $filename .= " $ts.log";
   $filename =~ s/ /_/g;
 
+  # Try to open the log file
   my $fh;
-  if (open($fh,">$filename")) {
+  my $file_path = cwd().'/'.$file_name;
+  if (open($fh,">$file_path")) {
     $self->{file_handle} = $fh;
-    $self->add_entry("Log file opened.\n");
+    $self->{file_name} = $file_name;
+    $self->{file_path} = $file_path;
+
+    $self->add_entry("Log file opened in:\n");
+    $self->add_entry("\t$file_path\n");
   }
   else {
+    print "Failed to open log file at $file_path. Error: $!\n";
     $self = 0;
   }
 
