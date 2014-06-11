@@ -44,8 +44,8 @@ sub init($$) {
     $self->{file_name} = $file_name;
     $self->{file_path} = $file_path;
 
-    $self->add_entry("Log file opened in:\n");
-    $self->add_entry("\t$file_path\n");
+    $self->add_entry("Log file opened in:\n",0);
+    $self->add_entry("\t$file_path\n",0);
   }
   else {
     print "Failed to open log file at $file_path. Error: $!\n";
@@ -73,15 +73,21 @@ sub close($) {
   my $self = shift;
   my $fh = $self->{file_handle};
   if ($fh) {
-    $self->add_entry("Log file closed.\n");
+    $self->add_entry("Log file closed.\n",0);
     close($fh);
     $self->{file_handle} = 0;
+    our $log = 0;
   }
 }
 
 sub DESTROY($) {
   my $self = shift;
   $self->close();
+}
+
+sub get_file_path($) {
+  my $self = shift;
+  return $self->{file_path};
 }
 
 # functions
