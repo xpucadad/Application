@@ -30,10 +30,10 @@ sub new($$) {
 
 sub init($$) {
   my $self = shift;
-  my $filename = shift;
+  my $file_name = shift;
   my $ts = get_time_stamp();
-  $filename .= " $ts.log";
-  $filename =~ s/ /_/g;
+  $file_name .= " $ts.log";
+  $file_name =~ s/ /_/g;
 
   # Try to open the log file
   my $fh;
