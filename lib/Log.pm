@@ -55,12 +55,18 @@ sub init($$) {
   return $self;
 }
 
-sub add_entry($$) {
+sub add_entry($$;$) {
   my $self = shift;
   my $message = shift;
+  my $print = 1;
+  if (@_ > 0) {
+    $print = shift;
+  }
   my $fh = $self->{file_handle};
   my $time_stamp = get_time_stamp();
-  print $fh $time_stamp.' '.$message;
+  my $full_msg = $time_stamp.' '.$message;
+  print $fh $full_msg;
+  print $full_msg if $print;
 }
 
 sub close($) {
