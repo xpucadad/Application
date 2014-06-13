@@ -8,6 +8,7 @@ use lib './lib';
 # project objects
 use Log;
 use ApplicationProperties;
+use ApplicationUtilities;
 
 #
 # ToDo: add argument processing
