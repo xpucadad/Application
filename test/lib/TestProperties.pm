@@ -1,16 +1,12 @@
-package ApplicationProperties;
-# This is an example of deriving
-# a new object from the Properties object.
-# In this case the new object will hold application properties.
-# These are always loaded a file in the ./config folder
-# that shares the main application's filename with a '.properties' extension.
+package TestProperties;
+# Object derived from Properties used to test Properties
 
 # Export a function (not a method) which can retrieve the single
 # instance of this object.
 BEGIN {
   use Exporter;
   @ISA = qw(Exporter);
-  @EXPORT = qw(get_application_properties);
+  @EXPORT = qw(get_test_properties);
 }
 
 use strict;
@@ -23,12 +19,12 @@ use base qw(Properties);
 sub new($) {
   my $class = shift;
   # Create a new Properties object and use it as your self.
-  my $self = new Properties('./config/Application.properties');
+  my $self = new Properties('./config/TestProperties.properties');
 
   # Bless our new self and save a pointer so we can make this a singleton.
   if ($self) {
     bless($self, $class);
-    our $properties = $self;
+    our $test_properties = $self;
   }
   return $self;
 }
@@ -37,17 +33,17 @@ sub new($) {
 # this object.
 # This should actually create the instance if it doesn't exist.
 # See Issue
-sub get_application_properties() {
-  our $properties;
-  if (!$properties) {
-    $properties = new ApplicationProperties();
+sub get_test_properties() {
+  our $test_properties;
+  if (!$test_properties) {
+    $test_properties = new TestProperties();
   }
-  return $properties;
+  return $test_properties;
 }
 
 # This is where the pointer to the singleton object is kept.
 BEGIN {
-  our $properties = 0;
+  our $test_properties = 0;
 }
 
 1;

@@ -31,10 +31,13 @@ my $deleted_count = $log->purge_log_files(10);
 $log->add_entry("$deleted_count old log files deleted\n");
 
 # Load properties for the application.
-my $properties = new ApplicationProperties();
+my $properties = get_application_properties();
 
 # Just for kicks, dump the properties
-$log->add_entry("These properties were loaded from")
+$log->add_entry("Here are the application properties that were loaded:\n");
+foreach my $key (keys(%$properties)) {
+  $log->add_entry("\t\'$key\': \'$properties->{$key}\'\n");
+}
 
 # Do some application work and log it.
 $log->add_entry("This is an entry in the log.\n");

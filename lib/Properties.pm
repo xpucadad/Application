@@ -49,6 +49,8 @@ sub load_properties($$) {
       # We currently don't trim either, but perhaps we should.
       # See Issue #6.
       my ($prop, $value) = split('=',$line);
+      $prop = _trim_whitespace($prop);
+      $value = _trim_whitespace($value);
       $self->{$prop} = $value;
       $log->add_entry("Property from $file_name: $prop=$self->{$prop}\n",0);
     }
@@ -77,6 +79,13 @@ sub _strip_comments($) {
   $input =~ s/\s*$//;
 
   return $input;
+}
+
+# Trims whitespace from the beginning and end of a string.
+sub _trim_whitespace($) {
+  my $string = shift;
+  $string =~ s/^\s*(.*?)\s*$/$1/;
+  return $string;
 }
 
 1;

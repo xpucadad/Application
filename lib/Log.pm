@@ -180,13 +180,13 @@ sub purge_log_files($$) {
       # It's one of ours. Decide whether to keep it or not
       if ($left_count < $keep_count) {
         # Skip the 1st keep_count files
-        print "Keeping $file\n";
+        #print "Keeping $file\n";
         $left_count++;
         next;
       }
       else {
         # Delete all the older ones and keep count
-        print "Deleting $file\n";
+        #print "Deleting $file\n";
         unlink($folder.'/'.$file);
         $deleted_count++
       }
