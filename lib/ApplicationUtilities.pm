@@ -10,6 +10,9 @@ use strict;
 use warnings;
 use base qw(BaseObject);
 
+# Project objects
+use Log;
+
 # If the application requires that some context information be maintained,
 # the constructor would be enhanced to allow creation of an object which
 # could maintain information to be used by other methods. Most functionality,
