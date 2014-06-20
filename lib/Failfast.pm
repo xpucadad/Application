@@ -28,6 +28,7 @@ use base qw(BaseObject);
 
 # Project objects
 use Log;
+use ApplicationUtilities;
 
 # Perl modules
 use Cwd;
@@ -61,15 +62,15 @@ sub new($$) {
 sub init($$) {
   my $self = shift;
   my $script_name = shift;
-  print "script name: $script_name\n";
+  #print "script name: $script_name\n";
   my $cwd = cwd();
-  print "cwd: $cwd\n";
+  #print "cwd: $cwd\n";
   my $lock_file_name = $script_name;
   $lock_file_name =~ s/^([^\.]+)\.\w*/$1/;
   $lock_file_name .= '.lock';
-  print "lock file name: $lock_file_name\n";
+  #print "lock file name: $lock_file_name\n";
   my $lock_file_path = $cwd.'/'.$lock_file_name;
-  print "lock file path: $lock_file_path\n";
+  #print "lock file path: $lock_file_path\n";
   $self->{lock_file_path} = $lock_file_path;
   return $self;
 }
@@ -79,8 +80,9 @@ sub script_is_locked($) {
   my $path = $self->{lock_file_path};
   if (-e $path?1:0) {
     my $log = $self->{log};
-    $log->add_entry("Script is locked. Exitting with status -98\n");
-    exit(-98);
+    $log->add_entry("This script is locked due to a previous failfast condition.\n");
+    $self->_unlock_instructions();
+    failure_exit(-98);
   }
   else {
     return 0;
@@ -92,11 +94,15 @@ sub exec($$) {
   my $message = shift;
   my $log = $self->{log};
   $log->add_entry($message);
+  $log->add_entry("The script has requested a failfast exit.\n");
   $self->_create_lock_file();
-  $log->add_entry("Exitting with status -99\n");
-  $log->close();
-  exit(-99);
+  $self->_unlock_instructions();
+  failure_exit(-99);
 }
+
+#
+# Private methods (should only be called by this class or derived classes)
+#
 
 sub _create_lock_file($) {
   my $self = shift;
@@ -104,24 +110,33 @@ sub _create_lock_file($) {
   my $log = $self->{log};
   if (open(LOCK,">$path")) {
     close(LOCK);
-    $log->add_entry("Failfast lock file $path created.\n");
+    $log->add_entry("The failfast lock file has been created:\n");
+    $log->add_entry("\t$path\n");
   }
   else {
     $log->add_entry("ERROR Failfast::failfast: Failed to create lock file $path. Error: $!\n");
   }
 }
 
+sub _unlock_instructions($) {
+  my $self = shift;
+  my $log = $self->{log};
+  $log->add_entry("To enable the script to run you should address the\n");
+  $log->add_entry("failfast condition, and then delete the lock file:\n");
+  $log->add_entry("\t$self->{lock_file_path}\n")
+}
 
-
+#
 # functions (not methods)
+#
 sub failfast($) {
-  my $message = "Failfast was called\n";
-  $message = shift if @_;
+  my $log = get_log();
+  $log->add_entry("INFO Failfast::failfast: failfast function called.\n");
+  my $message = shift;
   our $failfast;
   if (!$failfast) {
-    my $log = get_log();
-    $log->add_entry("ERROR Failfast::failfast: No Failfast object was created!\n");
-    $log->add_entry("ERROR Failfast::failfast: Will create generic lock file\n");
+    $log->add_entry("ERROR Failfast::failfast: No Failfast object exists!\n");
+    $log->add_entry("ERROR Failfast::failfast: Will create generic lock file.\n");
 
     $failfast = new Failfast("failfast_generic");
   }

@@ -10,6 +10,9 @@ use strict;
 use warnings;
 use base qw(BaseObject);
 
+# Application objects
+use Log;
+
 # If the application requires that some context information be maintained,
 # the constructor would be enhanced to allow creation of an object which
 # could maintain information to be used by other methods. Most functionality,
@@ -34,7 +37,7 @@ sub failure_exit(;$) {
 
   my $log = get_log();
   if ($log) {
-    $log->add_entry("Application failed; exitting with status $status\n");
+    $log->add_entry("Script failed; exitting with status $status\n");
     $log->close();
   }
   exit($status)

@@ -8,6 +8,7 @@ use Log;
 use Failfast;
 
 my $log = new Log($0);
+$log->purge_log_files(10);
 
 my $failfast = new Failfast($0);
 
@@ -18,6 +19,7 @@ else {
   $log->add_entry("Script wasn't locked!\n");
 }
 
-my $test = failfast("Called using function\n");
+#my $test = failfast("Failfast requested using failfast() function.\n");
+my $test = $failfast->exec("Failfast requested using exec() method.\n");
 
 exit(0);
