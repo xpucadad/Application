@@ -65,7 +65,10 @@ sub _init($$) {
   $self->{file_name_root} = $file_name;
 
   # Use the cwd as the file folder.
-  my $file_folder = cwd();
+  my $file_folder = cwd().'/logs';
+  if (!-e $file_folder) {
+    mkdir($file_folder);
+  }
 
   # Get a timestamp and remove any characters which
   # should not appear in file names.

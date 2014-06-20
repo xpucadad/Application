@@ -1,6 +1,7 @@
-#Application Template
+#Perl OO Application Template
 
 Template Perl application with logging object and property object.
 
-*The application is still in draft form*
+*V1.0 is  done.*
+
 
