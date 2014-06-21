@@ -40,7 +40,7 @@ sub init($$) {
     $self->{template_string} = $template;
     $self->{template_path} = $path;
     $self->{token_hash} = {};
-    $log->add_entry("Template: loaded template from file $path\n",0);
+    $log->add_entry("Template: loaded template from file $path.\n",0);
   }
   else {
     $log->add_entry("Template: cannot find template file \'$path\'.\n");
@@ -104,7 +104,7 @@ sub _log_new_token($$) {
   my $self = shift;
   my $token = shift;
   my $log = $self->{log};
-  $log->add_entry("Template: set value of \'$token\' to \'$self->{token_hash}->{$token}\'\n",0);
+  $log->add_entry("Template: set value of \'$token\' to \'$self->{token_hash}->{$token}\'.\n",0);
 }
 
 1;

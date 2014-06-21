@@ -170,7 +170,7 @@ sub purge_log_files($$) {
   if (opendir(FOLDER, $folder)) {
     my @full_folder_list = readdir(FOLDER);
     closedir(FOLDER);
-    $self->add_entry("Purging all $file_name_root log files before the newest $keep_count\n",0);
+    $self->add_entry("Purging all $file_name_root log files except the lastest $keep_count.\n",0);
     my @sorted = reverse(sort(@full_folder_list));
 
     my $left_count = 0;
@@ -194,9 +194,10 @@ sub purge_log_files($$) {
         $deleted_count++
       }
     }
+    $self->add_entry("Purged $deleted_count old $file_name_root log file(s).\n",0);
   }
   else {
-    $self->add_entry("Log->purge_log_files: Failed to open the log folder; Error $!\n");
+    $self->add_entry("Log->purge_log_files: Failed to open the log folder; Error $!\n.");
     $deleted_count = -1;
   }
 

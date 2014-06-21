@@ -9,6 +9,7 @@ use Log;
 use ApplicationUtilities;
 
 my $log = new Log($0);
+$log->purge_log_files(10);
 
 my $template = new Template('testTemplate.html');
 if (!$template) {
