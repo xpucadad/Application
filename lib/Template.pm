@@ -77,7 +77,17 @@ sub set_tokens($$) {
 sub get_token($$) {
   my $self = shift;
   my $token = shift;
-  return $self->{token_hash}->{token};
+  return $self->{token_hash}->{$token};
+  # print ("get_token - token: $token\n");
+  # my $token_hash = $self->{token_hash};
+  # my $value = $token_hash->{$token};
+  # print ("get_token - token: $token; value: $value\n");
+  # return $value;
+}
+
+sub get_tokens($) {
+  my $self = shift;
+  return $self->{token_hash};
 }
 
 sub get_processed_output($) {
@@ -91,13 +101,39 @@ sub get_processed_output($) {
 #
 sub _process($) {
   my $self = shift;
+  my $log = $self->{log};
   my $processed_template = $self->{template_string};
   my $token_hash = $self->{token_hash};
 
-  foreach my $token (%$token_hash) {
-    $processed_template =~ s/<%$token%>/$token_hash->{$token}/g;
+  foreach my $token (keys(%$token_hash)) {
+    my $value = $self->_process_token($token);
+    if ($value) {
+      $processed_template =~ s/<%$token%>/$value/g;
+    }
+    else {
+      $log->add_entry("Value not found for token $token; tags will be left unprocessed.\n");
+    }
   }
   $self->{processed_results} = $processed_template;
+}
+
+sub _process_token($$) {
+  my $self = shift;
+  my $token = shift;
+  my $log = $self->{log};
+  my $raw_value = $self->get_token($token);
+  my $value = '';
+
+  my $type = ref($raw_value);
+  if ($type) {
+    $log->add_entry("Token $token is a ref to $type\n");
+  }
+  else {
+    $log->add_entry("Token $token is not a ref\n");
+    $value = $raw_value;
+  }
+
+  return $value;
 }
 
 sub _log_new_token($$) {

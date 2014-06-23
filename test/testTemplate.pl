@@ -19,6 +19,12 @@ if (!$template) {
 $template->set_token('name','Sexy Hunk');
 $template->set_token('years','35');
 
+# my $token_hash = $template->get_tokens();
+# foreach my $token (keys(%$token_hash)) {
+#   my $value = $token_hash->{$token};
+#   print "$token: $value\n";
+# }
+
 my $processed_content = $template->get_processed_output();
 
 my $output_file_name = "processedTestTemplate.html";
