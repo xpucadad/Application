@@ -6,6 +6,12 @@ use strict;
 use warnings;
 
 use base qw(BaseObject);
+our (@ISA, @EXPORT_OK);
+BEGIN {
+  require Exporter;
+  @ISA = qw(Exporter);
+  @EXPORT_OK = qw(current_date current_time current_date_time);  # symbols to export on request
+}
 
 # Perl modules
 use File::Slurp;
@@ -127,6 +133,9 @@ sub _process_token($$) {
   my $type = ref($raw_value);
   if ($type) {
     $log->add_entry("Token $token is a ref to $type\n");
+    if ($type eq 'CODE') {
+      $value = &$raw_value();
+    }
   }
   else {
     $log->add_entry("Token $token is not a ref\n");
@@ -143,4 +152,28 @@ sub _log_new_token($$) {
   $log->add_entry("Template: set value of \'$token\' to \'$self->{token_hash}->{$token}\'.\n",0);
 }
 
+#
+# Convenience functions
+#
+sub current_date() {
+  my ($sec,$min,$hour,$mday,$mon,$year) = localtime(time);
+  my $ts = sprintf("%4d-%02d-%02d",
+          $year + 1900, $mon + 1, $mday);
+  return $ts;
+}
+
+sub current_time() {
+  my ($sec,$min,$hour) = localtime(time);
+  my $ts = sprintf("%02d:%02d:%02d",
+          $hour, $min, $sec);
+  return $ts;
+}
+
+sub current_date_time() {
+  my ($sec,$min,$hour,$mday,$mon,$year) = localtime(time);
+  my $ts = sprintf("%4d-%02d-%02d %02d:%02d:%02d",
+          $year + 1900, $mon + 1, $mday,
+          $hour, $min, $sec);
+  return $ts;
+}
 1;
