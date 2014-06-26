@@ -13,9 +13,6 @@ BEGIN {
   @EXPORT_OK = qw(current_date current_time current_date_time);  # symbols to export on request
 }
 
-# Perl modules
-use File::Slurp;
-
 # Project objects
 use Log;
 
@@ -39,14 +36,21 @@ sub init($$) {
   # Try to load the template file into a string.
   my $path = "./config/".$file;
   #print "path: $path\n";
+
   if (-e $path) {
-    my $template = read_file($path);
-    #print "template: $template\n";
-    $self->{template_file} = $file;
-    $self->{template_string} = $template;
-    $self->{template_path} = $path;
-    $self->{token_hash} = {};
-    $log->add_entry("Template: loaded template from file $path.\n",0);
+    if (open(TEMP, $path)) {
+      my @template = <TEMP>;
+      close(TEMP);
+      $self->{template_file} = $file;
+      $self->{template_array} = \@template;
+      $self->{template_path} = $path;
+      $self->{token_hash} = {};
+      $log->add_entry("Template: loaded template from file $path.\n",0);
+    }
+    else {
+      $log->add_entry("Template: failed to load template file $path; Error: $!\n");
+      $self = 0;
+    }
   }
   else {
     $log->add_entry("Template: cannot find template file \'$path\'.\n");
@@ -108,17 +112,22 @@ sub get_processed_output($) {
 sub _process($) {
   my $self = shift;
   my $log = $self->{log};
-  my $processed_template = $self->{template_string};
+  my $processed_template;
   my $token_hash = $self->{token_hash};
 
-  foreach my $token (keys(%$token_hash)) {
-    my $value = $self->_process_token($token);
-    if ($value) {
-      $processed_template =~ s/<%$token%>/$value/g;
+  foreach my $line (@{$self->{template_array}}) {
+    foreach my $token (keys(%$token_hash)) {
+      if ($line =~ /^.*<%$token%>/) {
+        my $value = $self->_process_token($token);
+        if ($value) {
+          $line =~ s/<%$token%>/$value/g;
+        }
+        else {
+          $log->add_entry("Value not found for token $token; tags will be left unprocessed.\n");
+        }
+      }
     }
-    else {
-      $log->add_entry("Value not found for token $token; tags will be left unprocessed.\n");
-    }
+    $processed_template .= $line;
   }
   $self->{processed_results} = $processed_template;
 }
@@ -132,13 +141,13 @@ sub _process_token($$) {
 
   my $type = ref($raw_value);
   if ($type) {
-    $log->add_entry("Token $token is a ref to $type\n");
+    $log->add_entry("Token $token is a ref to $type\n",0);
     if ($type eq 'CODE') {
       $value = &$raw_value();
     }
   }
   else {
-    $log->add_entry("Token $token is not a ref\n");
+    $log->add_entry("Token $token is not a ref\n",0);
     $value = $raw_value;
   }
 
