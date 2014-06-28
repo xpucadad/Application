@@ -3,7 +3,7 @@ package ApplicationUtilities;
 BEGIN {
   use Exporter;
   @ISA = qw(Exporter);
-  @EXPORT = qw(failure_exit);
+  @EXPORT = qw(failure_exit success_exit);
 }
 
 use strict;
@@ -43,4 +43,14 @@ sub failure_exit(;$) {
   exit($status)
 }
 
+sub success_exit(;$) {
+  my $status = 0;
+  $status = shift if (@_ > 0);
+  my $log = get_log();
+  if ($log) {
+    $log->add_entry("Script completed successfully; exitting with status $status\n");
+    $log->close();
+  }
+  exit ($status);
+}
 1;

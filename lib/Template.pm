@@ -15,6 +15,7 @@ BEGIN {
 
 # Project objects
 use Log;
+use Tokens;
 
 # Constructor.
 # 0: class
@@ -29,6 +30,12 @@ sub new($$) {
   return $self->init($file);
 }
 
+# Initialize the Template object.
+# - read in the template file
+# - get a Tokens object to hold the tokens
+# 0: self
+# 1: template file name.
+# r: self
 sub init($$) {
   my $self = shift;
   my $file = shift;
@@ -37,22 +44,27 @@ sub init($$) {
   my $path = "./config/".$file;
   #print "path: $path\n";
 
+  # If the template file doesn't exist, we're done.
   if (-e $path) {
+    # The template file exists - read it in
     if (open(TEMP, $path)) {
+      # Successfully opened for read, so complete our setup.
       my @template = <TEMP>;
       close(TEMP);
       $self->{template_file} = $file;
       $self->{template_array} = \@template;
       $self->{template_path} = $path;
-      $self->{token_hash} = {};
+      $self->{tokens} = new Tokens();
       $log->add_entry("Template: loaded template from file $path.\n",0);
     }
     else {
+      # Failed to open the template file so we need to fail.
       $log->add_entry("Template: failed to load template file $path; Error: $!\n");
       $self = 0;
     }
   }
   else {
+    # The template file does not exist so we need to fail.
     $log->add_entry("Template: cannot find template file \'$path\'.\n");
     $self = 0;
   }
@@ -64,42 +76,52 @@ sub get_template_file_name($) {
   return $self->{template_file};
 }
 
-sub set_token($$$) {
+# Sets the value associated with a template name.
+# 0: self
+# 1: token name
+# 2: token value
+# r: the created token object
+sub set_token_value($$$) {
   my $self = shift;
-  my $token_hash = $self->{token_hash};
-  my $token = shift;
+  my $name = shift;
   my $value = shift;
-  $token_hash->{$token} = $value;
-  $self->_log_new_token($token);
+  my $tokens = $self->{tokens};
+  $tokens->set_token_value($name, $value);
+  my $token = $tokens->get_token($name);
+  return $token;
 }
 
-sub set_tokens($$) {
+# Sets multiple token values provide in a hash
+# 0: self
+# 1: A hash with token name:value pairs.
+# r: none
+sub set_token_values($$) {
   my $self = shift;
   my $new_tokens = shift;
-  my $token_hash = $self->{token_hash};
+  my $tokens = $self->{tokens};
 
-  foreach my $token (%$new_tokens) {
-    $token_hash->{$token} = $new_tokens->{$token};
-    $self->_log_new_token($token);
+  foreach my $name (%$new_tokens) {
+    $tokens->set_token_value($name, $new_tokens->{$name});
   }
 }
 
-sub get_token($$) {
+# Gets a token's value from the token by way of the tokens hash and returns it.
+# 0: self
+# 1: token name
+# r: token's fully resolved value
+sub get_token_value($$) {
   my $self = shift;
-  my $token = shift;
-  return $self->{token_hash}->{$token};
-  # print ("get_token - token: $token\n");
-  # my $token_hash = $self->{token_hash};
-  # my $value = $token_hash->{$token};
-  # print ("get_token - token: $token; value: $value\n");
-  # return $value;
+  my $name = shift;
+  return $self->{tokens}->get_token_value($name);
 }
 
+# Returns the token hash
 sub get_tokens($) {
   my $self = shift;
-  return $self->{token_hash};
+  return $self->{tokens};
 }
 
+# Applies the current token to the template and returns the processed results.
 sub get_processed_output($) {
   my $self = shift;
   $self->_process();
@@ -109,56 +131,46 @@ sub get_processed_output($) {
 #
 # Local methods
 #
+
+# Applies the tokens to the template and stores the result in processed_results.
 sub _process($) {
   my $self = shift;
   my $log = $self->{log};
   my $processed_template;
-  my $token_hash = $self->{token_hash};
 
+  # Process each line in the template
   foreach my $line (@{$self->{template_array}}) {
-    foreach my $token (keys(%$token_hash)) {
-      if ($line =~ /^.*<%$token%>/) {
-        my $value = $self->_process_token($token);
-        if ($value) {
-          $line =~ s/<%$token%>/$value/g;
-        }
-        else {
-          $log->add_entry("Value not found for token $token; tags will be left unprocessed.\n");
-        }
-      }
-    }
-    $processed_template .= $line;
+    $processed_template .= $self->_process_line($line);
   }
   $self->{processed_results} = $processed_template;
 }
 
-sub _process_token($$) {
+# Apply the tokens to a single line and return the processed results.
+sub _process_line($$) {
   my $self = shift;
-  my $token = shift;
-  my $log = $self->{log};
-  my $raw_value = $self->get_token($token);
-  my $value = '';
+  my $line = shift;
+  my $processed_line = '';
 
-  my $type = ref($raw_value);
-  if ($type) {
-    $log->add_entry("Token $token is a ref to $type\n",0);
-    if ($type eq 'CODE') {
-      $value = &$raw_value();
+  # Process the tokens in the line in order.
+  my $name;
+  my $end;
+  my $value;
+  my $type;
+  while (length($line)) {
+    if ($line =~ /(.*?)<%([^%]+)%>(.*)$/) {
+      $processed_line .= $1;
+      $name = $2;
+      $end = $3;
+      $value = $self->get_token_value($name);
+      $processed_line .= $value;
+      $line = $end;
+    }
+    else {
+      $processed_line .= $line;
+      $line = '';
     }
   }
-  else {
-    $log->add_entry("Token $token is not a ref\n",0);
-    $value = $raw_value;
-  }
-
-  return $value;
-}
-
-sub _log_new_token($$) {
-  my $self = shift;
-  my $token = shift;
-  my $log = $self->{log};
-  $log->add_entry("Template: set value of \'$token\' to \'$self->{token_hash}->{$token}\'.\n",0);
+  return $processed_line;
 }
 
 #
