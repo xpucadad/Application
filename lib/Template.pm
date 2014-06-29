@@ -105,14 +105,11 @@ sub set_token_values($$) {
   }
 }
 
-# Gets a token's value from the token by way of the tokens hash and returns it.
-# 0: self
-# 1: token name
-# r: token's fully resolved value
-sub get_token_value($$) {
+sub process_token($$$) {
   my $self = shift;
   my $name = shift;
-  return $self->{tokens}->get_token_value($name);
+  my $context = shift;
+  return $self->{tokens}->process_token($name,$context);
 }
 
 # Returns the token hash
@@ -148,29 +145,26 @@ sub _process($) {
 # Apply the tokens to a single line and return the processed results.
 sub _process_line($$) {
   my $self = shift;
-  my $line = shift;
-  my $processed_line = '';
+  my $to_process = shift;
 
   # Process the tokens in the line in order.
-  my $name;
-  my $end;
-  my $value;
-  my $type;
-  while (length($line)) {
-    if ($line =~ /(.*?)<%([^%]+)%>(.*)$/) {
-      $processed_line .= $1;
-      $name = $2;
-      $end = $3;
-      $value = $self->get_token_value($name);
-      $processed_line .= $value;
-      $line = $end;
+  my $context = {};
+  $context->{to_process} = $to_process;
+  $context->{processed} = '';
+  while (length($context->{to_process})) {
+    if ($context->{to_process} =~ /(.*?)(<%([^%]+)%>)(.*)$/) {
+      $context->{processed} .= $1;
+      $context->{token_tag} = $2;
+      $context->{token_name} = $3;
+      $context->{to_process} = $4;
+      $self->process_token($context->{token_name}, $context);
     }
     else {
-      $processed_line .= $line;
-      $line = '';
+      $context->{processed} .= $context->{to_process};
+      $context->{to_process} = '';
     }
   }
-  return $processed_line;
+  return $context->{processed};
 }
 
 #

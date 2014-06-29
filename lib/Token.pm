@@ -22,7 +22,15 @@ sub get_value($) {
   my $self = shift;
   my $log = $self->{log};
   my $type = ref($self);
-  $log->add_entry("WARNING: Token: $type must define the get_value method.\n");
+  $log->add_entry("WARNING: Token: $type must define the get_value method!\n");
+  return 0;
+}
+
+# Another abstract function
+sub process($$) {
+  my $self = shift;
+  my $type = ref($self);
+  $self->{log}->add_entry("WARNING: Token: $type must define process method!\n");
   return 0;
 }
 

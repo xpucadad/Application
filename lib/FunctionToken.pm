@@ -25,4 +25,13 @@ sub get_value($) {
   return $return;
 }
 
+sub process($$) {
+  my $self = shift;
+  my $context = shift;
+  my $value = $self->get_value();
+
+  $context->{processed} .= $value;
+  return $value;
+}
+
 1;

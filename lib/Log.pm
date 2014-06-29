@@ -194,7 +194,7 @@ sub purge_log_files($$) {
         $deleted_count++
       }
     }
-    $self->add_entry("Purged $deleted_count old $file_name_root log file(s).\n",0);
+    $self->add_entry("Purged $deleted_count oldest $file_name_root log file(s).\n",0);
   }
   else {
     $self->add_entry("Log->purge_log_files: Failed to open the log folder; Error $!\n.");

@@ -52,9 +52,23 @@ sub get_token_value($$) {
     $value = $token->get_value();
   }
   else {
-    $self->{log}->add_entry("WARNING: Tokens: token $name is not defined.\n");
+    $self->{log}->add_entry("WARNING: Tokens: token \'$name\' is not defined!\n");
   }
   return $value;
+}
+
+sub process_token($$$) {
+  my $self = shift;
+  my $name = shift;
+  my $context = shift;
+  my $token = $self->{tokens}->{$name};
+  if ($token) {
+    $token->process($context);
+  }
+  else {
+    $self->{log}->add_entry("WARNING: Tokens: token \'$name\' is not defined!\n");
+    $context->{processed} .= $context->{token_tag};
+  }
 }
 
 # Returns the Token object for the $name.
