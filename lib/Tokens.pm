@@ -6,6 +6,7 @@ use warnings;
 use base qw(BaseObject);
 use ValueToken;
 use FunctionToken;
+use ArrayToken;
 
 sub new($) {
   my $class = shift;
@@ -30,6 +31,9 @@ sub set_token_value($$$) {
   # Choose the appropriate type of token to create
   if ($ref eq 'CODE') {
     $token = new FunctionToken($name, $value);
+  }
+  elsif ($ref eq 'ARRAY') {
+    $token = new ArrayToken($name, $value);
   }
   else {
     $token = new ValueToken($name, $value);
