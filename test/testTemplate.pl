@@ -29,8 +29,9 @@ $template->set_token_value('timestamp', \&current_date_time);
 
 my @rows;
 push(@rows,',');
-push(@rows,'11,12,13');
-push(@rows,'21,22,23');
+push(@rows,'name: <%name%>,age: <%years%>,trash: <%shittalk%>');
+
+push(@rows,'<%date%>,<%time%>,<%timestamp%>');
 push(@rows,'31,32,33');
 $template->set_token_value('table_row',\@rows);
 

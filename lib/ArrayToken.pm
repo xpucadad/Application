@@ -70,7 +70,6 @@ sub process($$) {
 
   my $template_line = $context->{to_process};
 
-  print "template_line: $template_line\n";
   # We want the result to be processed for other tokens so we put the result
   # in to_process and return an empty value
   $context->{to_process} = $self->get_value($template_line);
