@@ -2,6 +2,5 @@
 
 Template Perl application with logging object and property object.
 
-*V1.0 is  done.*
-
-
+*V1.0 is done.*
+*V2.0 is ready but not officially done.*
